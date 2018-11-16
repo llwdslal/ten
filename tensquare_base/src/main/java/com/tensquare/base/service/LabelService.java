@@ -47,48 +47,29 @@ public class LabelService {
 
 
     public List<Label> findSearch(Label label) {
-        return labelDao.findAll(new Specification<Label>() {
-            @Override
-            public Predicate toPredicate(Root<Label> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
-                List<Predicate> list = new ArrayList<>();
-
-                if (!StringUtils.isEmpty(label.getLabelname())) {
-                    Predicate predicate = cb.like(root.get("labelname").as(String.class), "%" + label.getLabelname() + "%");
-                    list.add(predicate);
-                }
-
-                if (!StringUtils.isEmpty(label.getState())){
-                    Predicate predicate = cb.like(root.get("state").as(String.class), label.getState());
-                    list.add(predicate);
-                }
-
-                Predicate [] parr = new Predicate[list.size()];
-                list.toArray(parr);
-                return cb.and(parr);
-            }
-        });
+        return labelDao.findAll((Specification<Label>) (root, criteriaQuery, cb) -> getPredicate(label, root, cb));
     }
 
     public Page<Label> pageQuery(Label label, int page, int size) {
-        return labelDao.findAll(new Specification<Label>() {
-            @Override
-            public Predicate toPredicate(Root<Label> root, CriteriaQuery<?> criteriaQuery, CriteriaBuilder cb) {
-                List<Predicate> list = new ArrayList<>();
-
-                if (!StringUtils.isEmpty(label.getLabelname())) {
-                    Predicate predicate = cb.like(root.get("labelname").as(String.class), "%" + label.getLabelname() + "%");
-                    list.add(predicate);
-                }
-
-                if (!StringUtils.isEmpty(label.getState())){
-                    Predicate predicate = cb.like(root.get("state").as(String.class), label.getState());
-                    list.add(predicate);
-                }
-
-                Predicate [] parr = new Predicate[list.size()];
-                list.toArray(parr);
-                return cb.and(parr);
-            }
-        },PageRequest.of(page - 1 ,size));
+        return labelDao.findAll((Specification<Label>) (root, criteriaQuery, cb) -> getPredicate(label, root, cb),PageRequest.of(page - 1 ,size));
     }
+
+    private Predicate getPredicate(Label label, Root<Label> root, CriteriaBuilder cb) {
+        List<Predicate> list = new ArrayList<>();
+
+        if (!StringUtils.isEmpty(label.getLabelname())) {
+            Predicate predicate = cb.like(root.get("labelname").as(String.class), "%" + label.getLabelname() + "%");
+            list.add(predicate);
+        }
+
+        if (!StringUtils.isEmpty(label.getState())){
+            Predicate predicate = cb.like(root.get("state").as(String.class), label.getState());
+            list.add(predicate);
+        }
+
+        Predicate [] parr = new Predicate[list.size()];
+        list.toArray(parr);
+        return cb.and(parr);
+    }
+
 }
